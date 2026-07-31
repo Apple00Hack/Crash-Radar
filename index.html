@@ -1,37 +1,244 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crash Radar</title>
+    <title>لعبة الحظ: الذهب والديناميت</title>
     <style>
-        body { background: #000; color: #fff; text-align: center; font-family: Arial; padding-top: 50px; }
-        #radarDisplay { font-size: 60px; color: #ff3e3e; font-weight: bold; margin: 20px; }
-        button { padding: 15px 30px; font-size: 20px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 10px; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #0f3460;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #e94560;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .menu button, .btn {
+            background: #e94560;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 10px;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        .menu button:hover, .btn:hover {
+            background: #ff6b81;
+            transform: translateY(-2px);
+        }
+
+        .game-area {
+            display: none;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            background: #1a1a2e;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .choices {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            background: #16213e;
+            border: 3px solid #0f3460;
+            border-radius: 12px;
+            width: 120px;
+            height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 14px;
+            padding: 10px;
+        }
+
+        .card:hover {
+            border-color: #e94560;
+            transform: scale(1.05);
+        }
+
+        .card .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Crash Radar</h1>
-    <div id="radarDisplay">1.00</div>
-    <button onclick="startGame()">ابدأ الرادار</button>
+    <div class="container" id="app">
+        <!-- القائمة الرئيسية -->
+        <div class="menu" id="mainMenu">
+            <h1>لعبة الحظ: الذهب والديناميت 💰🧨</h1>
+            <p style="margin-bottom: 20px; color: #ccc;">اختبر حظك واصعد بأرباحك!</p>
+            <button onclick="startGame(2)">مستوى المضاعفة (x2)</button>
+            <br>
+            <button onclick="startGame(3)">مستوى المضاعفة (x3)</button>
+        </div>
+
+        <!-- منطقة اللعبة -->
+        <div class="game-area" id="gameArea">
+            <h2 id="levelTitle">المستوى</h2>
+            <div class="stats">
+                <div>الرصيد: <span id="balance">100</span>$</div>
+                <div>الرهان: <span id="bet">50</span>$</div>
+            </div>
+
+            <p id="instruction" style="margin: 15px 0; color: #f1f1f1;"></p>
+
+            <div class="choices" id="choicesContainer">
+                <!-- يتم توليد الاختيارات هنا عبر الـ JavaScript -->
+            </div>
+
+            <div id="message"></div>
+
+            <button id="nextBtn" class="btn hidden" onclick="nextRound()">العب مرة أخرى</button>
+            <button class="btn" style="background: #444; font-size: 14px; padding: 8px 15px;" onclick="returnToMenu()">القائمة الرئيسية</button>
+        </div>
+    </div>
 
     <script>
-        function startGame() {
-            let num = 1.00;
-            let crashPoint = (Math.random() * (30 - 1) + 1).toFixed(2); // رقم عشوائي للانفجار
-            let display = document.getElementById("radarDisplay");
-            
-            let game = setInterval(() => {
-                num += 0.05; // سرعة العداد
-                display.innerText = num.toFixed(2);
+        let balance = 1000;
+        let currentLevel = 2;
+        let betAmount = 50;
+        let gameActive = true;
 
-                if (num >= crashPoint) {
-                    clearInterval(game);
-                    display.innerText = "BOOM! " + crashPoint;
-                    display.style.color = "red";
+        function startGame(level) {
+            currentLevel = level;
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'block';
+            document.getElementById('levelTitle').innerText = level === 2 ? "مستوى الاختيارين (x2)" : "مستوى الخانات الثلاث (x3)";
+            document.getElementById('instruction').innerText = level === 2 ? 
+                "اختر بين سبائك الذهب 🥇 والديناميت 🧨" : 
+                "اختر بين سبائك الذهب 🥇 والديناميت 🧨 في 3 خانات!";
+            updateStats();
+            setupBoard();
+        }
+
+        function updateStats() {
+            document.getElementById('balance').innerText = balance;
+            document.getElementById('bet').innerText = betAmount;
+        }
+
+        function setupBoard() {
+            gameActive = true;
+            document.getElementById('message').innerText = "";
+            document.getElementById('nextBtn').classList.add('hidden');
+            const container = document.getElementById('choicesContainer');
+            container.innerHTML = "";
+
+            // تحديد مكان الصواب عشوائياً
+            const winningIndex = Math.floor(Math.random() * currentLevel);
+
+            for (let i = 0; i < currentLevel; i++) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="icon">❓</div>
+                    <div>اختر</div>
+                `;
+                card.onclick = () => handleChoice(i, winningIndex, card);
+                container.appendChild(card);
+            }
+        }
+
+        function handleChoice(selectedIndex, winningIndex, selectedCard) {
+            if (!gameActive) return;
+            gameActive = false;
+
+            const cards = document.querySelectorAll('.card');
+
+            cards.forEach((card, index) => {
+                card.onclick = null; // تعطيل النقر بعد الاختيار
+                if (index === winningIndex) {
+                    card.innerHTML = `<div class="icon">🧱🧱🧱</div><div>سبائك ذهب</div>`;
+                    card.style.borderColor = "#2ecc71";
+                } else {
+                    card.innerHTML = `<div class="icon">🧨🧨🧨</div><div>ديناميت</div>`;
+                    card.style.borderColor = "#e94560";
                 }
-            }, 100);
+            });
+
+            const msg = document.getElementById('message');
+            if (selectedIndex === winningIndex) {
+                let win = betAmount * currentLevel;
+                balance += win;
+                msg.style.color = "#2ecc71";
+                msg.innerText = `مبروك! ربحت ${win}$ 🎉`;
+            } else {
+                balance -= betAmount;
+                msg.style.color = "#e94560";
+                msg.innerText = `بووووم! انفجرت وخسرت الرهان 💥`;
+            }
+
+            updateStats();
+            document.getElementById('nextBtn').classList.remove('hidden');
+        }
+
+        function nextRound() {
+            if (balance <= 0) {
+                alert("خلصت فلوسك! سيتم إعادة شحن رصيدك.");
+                balance = 1000;
+            }
+            setupBoard();
+        }
+
+        function returnToMenu() {
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'block';
         }
     </script>
 </body>
