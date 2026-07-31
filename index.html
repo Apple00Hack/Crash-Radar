@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لعبة الحظ: الذهب والديناميت</title>
+    <title>لعبة منجم الذهب</title>
     <style>
         * {
             box-sizing: border-box;
@@ -13,230 +13,299 @@
         }
 
         body {
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            background: linear-gradient(135deg, #2c3e50, #1a252f);
             color: #fff;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 10px;
         }
 
         .container {
-            background: #0f3460;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            background: #d4a373;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
             text-align: center;
-            max-width: 500px;
+            max-width: 450px;
             width: 100%;
+            border: 5px solid #bc6c25;
         }
 
         h1 {
-            color: #e94560;
-            margin-bottom: 20px;
-            font-size: 24px;
+            color: #386641;
+            margin-bottom: 10px;
+            font-size: 22px;
+            text-shadow: 1px 1px #faedcd;
         }
 
-        .menu button, .btn {
-            background: #e94560;
+        .menu select, .menu input, .btn {
+            background: #606c38;
             color: white;
             border: none;
-            padding: 12px 25px;
-            font-size: 18px;
-            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
             cursor: pointer;
-            margin: 10px;
-            transition: 0.3s;
+            margin: 8px;
             font-weight: bold;
         }
 
-        .menu button:hover, .btn:hover {
-            background: #ff6b81;
-            transform: translateY(-2px);
+        .menu input {
+            background: #fff;
+            color: #000;
+            width: 120px;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background: #283618;
         }
 
         .game-area {
             display: none;
         }
 
-        .stats {
+        .header-info {
             display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-            background: #1a1a2e;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 16px;
+            justify-content: space-between;
+            background: #fefae0;
+            color: #283618;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 14px;
         }
 
-        .choices {
+        /* لوحة الخطوات (المستويات) */
+        .ladder {
             display: flex;
+            flex-direction: column-reverse; /* الصعود من البداية للأعلى */
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+
+        .row-level {
+            display: flex;
+            gap: 6px;
             justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
         }
 
-        .card {
-            background: #16213e;
-            border: 3px solid #0f3460;
-            border-radius: 12px;
-            width: 120px;
-            height: 150px;
+        .box {
+            background: #e9edc9;
+            border: 2px solid #ccd5ae;
+            border-radius: 6px;
+            height: 40px;
+            flex: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+            cursor: not-allowed;
+            transition: 0.2s;
+        }
+
+        .box.active {
+            background: #fefae0;
+            border-color: #dda15e;
             cursor: pointer;
-            transition: 0.3s;
-            font-size: 14px;
-            padding: 10px;
+            box-shadow: 0 0 8px rgba(221, 161, 94, 0.8);
         }
 
-        .card:hover {
-            border-color: #e94560;
-            transform: scale(1.05);
+        .box.active:hover {
+            transform: scale(1.03);
+            background: #faedcd;
         }
 
-        .card .icon {
-            font-size: 40px;
-            margin-bottom: 10px;
+        .box.revealed {
+            cursor: default;
         }
 
         #message {
-            margin-top: 20px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
-            min-height: 30px;
+            margin: 10px 0;
+            min-height: 25px;
+            color: #283618;
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
     </style>
 </head>
 <body>
 
-    <div class="container" id="app">
+    <div class="container">
         <!-- القائمة الرئيسية -->
         <div class="menu" id="mainMenu">
-            <h1>لعبة الحظ: الذهب والديناميت 💰🧨</h1>
-            <p style="margin-bottom: 20px; color: #ccc;">اختبر حظك واصعد بأرباحك!</p>
-            <button onclick="startGame(2)">مستوى المضاعفة (x2)</button>
-            <br>
-            <button onclick="startGame(3)">مستوى المضاعفة (x3)</button>
+            <h1>رحلة منجم الذهب 🤠</h1>
+            <p style="color: #283618; margin-bottom: 15px; font-size: 14px;">اختر وضع الصعود وضع رهانك</p>
+            
+            <div style="margin-bottom: 10px;">
+                <label style="color: #283618; font-weight: bold;">الوضع:</label>
+                <select id="gameMode" style="padding: 8px; border-radius: 5px;">
+                    <option value="2">مستوى 2x (خيارين)</option>
+                    <option value="3">مستوى 3x (3 خيارات)</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <label style="color: #283618; font-weight: bold;">الرهان (ج.م):</label>
+                <input type="number" id="betInput" value="100" min="10">
+            </div>
+
+            <button class="btn" onclick="initGame()">ابدأ الرحلة 🚀</button>
         </div>
 
-        <!-- منطقة اللعبة -->
+        <!-- شاشة اللعب -->
         <div class="game-area" id="gameArea">
-            <h2 id="levelTitle">المستوى</h2>
-            <div class="stats">
-                <div>الرصيد: <span id="balance">100</span>$</div>
-                <div>الرهان: <span id="bet">50</span>$</div>
+            <div class="header-info">
+                <div>الرهان: <span id="currentBet">100</span> ج.م</div>
+                <div>الخطوة: <span id="currentStepText">1</span> / 6</div>
             </div>
 
-            <p id="instruction" style="margin: 15px 0; color: #f1f1f1;"></p>
-
-            <div class="choices" id="choicesContainer">
-                <!-- يتم توليد الاختيارات هنا عبر الـ JavaScript -->
+            <!-- سلم المستويات -->
+            <div class="ladder" id="ladderContainer">
+                <!-- سيتم توليد الخطوات هنا بالبرمجة -->
             </div>
 
-            <div id="message"></div>
+            <div id="message">اختر خانة للبدء في الصعود!</div>
 
-            <button id="nextBtn" class="btn hidden" onclick="nextRound()">العب مرة أخرى</button>
-            <button class="btn" style="background: #444; font-size: 14px; padding: 8px 15px;" onclick="returnToMenu()">القائمة الرئيسية</button>
+            <button id="restartBtn" class="btn hidden" onclick="resetToMenu()">العب مرة أخرى</button>
         </div>
     </div>
 
     <script>
-        let balance = 1000;
-        let currentLevel = 2;
-        let betAmount = 50;
-        let gameActive = true;
+        let mode = 2; // 2x أو 3x
+        let bet = 100;
+        let currentStep = 0;
+        const totalSteps = 6; // عدد الخطوات في الصعود
+        let winningPaths = []; // لتخزين مكان الذهب الصحيح في كل خطوة
+        let gameOver = false;
 
-        function startGame(level) {
-            currentLevel = level;
+        function initGame() {
+            mode = parseInt(document.getElementById('gameMode').value);
+            bet = parseFloat(document.getElementById('betInput').value);
+            
+            if (isNaN(bet) || bet <= 0) {
+                alert("يرجى إدخال مبلغ رهان صحيح!");
+                return;
+            }
+
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('gameArea').style.display = 'block';
-            document.getElementById('levelTitle').innerText = level === 2 ? "مستوى الاختيارين (x2)" : "مستوى الخانات الثلاث (x3)";
-            document.getElementById('instruction').innerText = level === 2 ? 
-                "اختر بين سبائك الذهب 🥇 والديناميت 🧨" : 
-                "اختر بين سبائك الذهب 🥇 والديناميت 🧨 في 3 خانات!";
-            updateStats();
-            setupBoard();
+            document.getElementById('currentBet').innerText = bet;
+            
+            resetGameVariables();
+            buildLadder();
         }
 
-        function updateStats() {
-            document.getElementById('balance').innerText = balance;
-            document.getElementById('bet').innerText = betAmount;
-        }
+        function resetGameVariables() {
+            currentStep = 0;
+            winningPaths = [];
+            gameOver = false;
+            document.getElementById('restartBtn').classList.add('hidden');
+            document.getElementById('message').innerText = "اختر خانة من الخطوة الحالية للصعود!";
 
-        function setupBoard() {
-            gameActive = true;
-            document.getElementById('message').innerText = "";
-            document.getElementById('nextBtn').classList.add('hidden');
-            const container = document.getElementById('choicesContainer');
-            container.innerHTML = "";
-
-            // تحديد مكان الصواب عشوائياً
-            const winningIndex = Math.floor(Math.random() * currentLevel);
-
-            for (let i = 0; i < currentLevel; i++) {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.innerHTML = `
-                    <div class="icon">❓</div>
-                    <div>اختر</div>
-                `;
-                card.onclick = () => handleChoice(i, winningIndex, card);
-                container.appendChild(card);
+            // تحديد مكان الذهب الصحيح عشوائياً لكل خطوة مسبقاً
+            for (let i = 0; i < totalSteps; i++) {
+                winningPaths.push(Math.floor(Math.random() * mode));
             }
         }
 
-        function handleChoice(selectedIndex, winningIndex, selectedCard) {
-            if (!gameActive) return;
-            gameActive = false;
+        function buildLadder() {
+            const ladder = document.getElementById('ladderContainer');
+            ladder.innerHTML = "";
 
-            const cards = document.querySelectorAll('.card');
+            for (let i = totalSteps - 1; i >= 0; i--) {
+                const row = document.createElement('div');
+                row.className = 'row-level';
+                row.id = `row-${i}`;
 
-            cards.forEach((card, index) => {
-                card.onclick = null; // تعطيل النقر بعد الاختيار
-                if (index === winningIndex) {
-                    card.innerHTML = `<div class="icon">🧱🧱🧱</div><div>سبائك ذهب</div>`;
-                    card.style.borderColor = "#2ecc71";
-                } else {
-                    card.innerHTML = `<div class="icon">🧨🧨🧨</div><div>ديناميت</div>`;
-                    card.style.borderColor = "#e94560";
+                for (let j = 0; j < mode; j++) {
+                    const box = document.createElement('div');
+                    box.className = `box ${i === currentStep ? 'active' : ''}`;
+                    box.innerText = "؟";
+                    box.dataset.step = i;
+                    box.dataset.index = j;
+                    
+                    box.onclick = () => makeChoice(i, j);
+                    row.appendChild(box);
                 }
-            });
+                ladder.appendChild(row);
+            }
+            document.getElementById('currentStepText').innerText = currentStep + 1;
+        }
 
-            const msg = document.getElementById('message');
-            if (selectedIndex === winningIndex) {
-                let win = betAmount * currentLevel;
-                balance += win;
-                msg.style.color = "#2ecc71";
-                msg.innerText = `مبروك! ربحت ${win}$ 🎉`;
+        function makeChoice(step, choiceIndex) {
+            if (gameOver || step !== currentStep) return;
+
+            const correctIndex = winningPaths[step];
+            const row = document.getElementById(`row-${step}`);
+            const boxes = row.children;
+
+            // كشف محتويات الخانات في هذه الخطوة
+            for (let j = 0; j < boxes.length; j++) {
+                boxes[j].classList.remove('active');
+                boxes[j].classList.add('revealed');
+                boxes[j].onclick = null; // إلغاء النقر
+
+                if (j === correctIndex) {
+                    boxes[j].innerHTML = "🪙🪙"; // سبائك الذهب
+                    boxes[j].style.background = "#d8f3dc";
+                } else {
+                    boxes[j].innerHTML = "🧨🧨"; // ديناميت
+                    boxes[j].style.background = "#ffb703";
+                }
+            }
+
+            if (choiceIndex === correctIndex) {
+                // اختيار صحيح (ذهب)
+                currentStep++;
+                if (currentStep < totalSteps) {
+                    document.getElementById('message').innerText = "ممتاز! صعدت خطوة للأعلى 🪙";
+                    activateCurrentStep();
+                } else {
+                    // الفوز بنهاية الرحلة بالكامل
+                    gameOver = true;
+                    let totalWin = bet * (mode === 2 ? 2 : 3) * totalSteps; // حساب الأرباح التراكمية أو حسب رغبتك
+                    document.getElementById('message').innerText = `مبروك! وصلت لقمة المنجم وحققت الكنز! 🎉`;
+                    document.getElementById('restartBtn').classList.remove('hidden');
+                }
             } else {
-                balance -= betAmount;
-                msg.style.color = "#e94560";
-                msg.innerText = `بووووم! انفجرت وخسرت الرهان 💥`;
+                // اختيار خاطئ (ديناميت) ولكن اللعبة لا توقفه بل تنتقل للخطوة التالية كما طلبتم!
+                currentStep++;
+                if (currentStep < totalSteps) {
+                    document.getElementById('message').innerText = "بوووم! ظهر ديناميت 🧨، لكنك صعدت للخطوة التالية بسلام!";
+                    activateCurrentStep();
+                } else {
+                    // انتهاء الخطوات
+                    gameOver = true;
+                    document.getElementById('message').innerText = `انتهت رحلة المنجم! شكراً لمحاولتك.`;
+                    document.getElementById('restartBtn').classList.remove('hidden');
+                }
             }
-
-            updateStats();
-            document.getElementById('nextBtn').classList.remove('hidden');
+            document.getElementById('currentStepText').innerText = Math.min(currentStep + 1, totalSteps);
         }
 
-        function nextRound() {
-            if (balance <= 0) {
-                alert("خلصت فلوسك! سيتم إعادة شحن رصيدك.");
-                balance = 1000;
+        function activateCurrentStep() {
+            if (currentStep < totalSteps) {
+                const row = document.getElementById(`row-${currentStep}`);
+                if (row) {
+                    for (let box of row.children) {
+                        box.classList.add('active');
+                    }
+                }
             }
-            setupBoard();
         }
 
-        function returnToMenu() {
+        function resetToMenu() {
             document.getElementById('gameArea').style.display = 'none';
             document.getElementById('mainMenu').style.display = 'block';
         }
