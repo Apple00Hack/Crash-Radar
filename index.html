@@ -85,10 +85,10 @@
             border: 1px solid #00ffcc;
         }
 
-        /* لوحة الكاشف (الخطوات) */
+        /* لوحة الكاشف مرتبة بحيث تكون الخطوة الأولى بالأسفل */
         .ladder {
             display: flex;
-            flex-direction: column-reverse;
+            flex-direction: column;
             gap: 6px;
             margin-bottom: 15px;
         }
@@ -167,7 +167,7 @@
 <body>
 
     <div class="container">
-        <!-- الصفحة الأولى: اختيار الوضع مباشرة -->
+        <!-- الصفحة الأولى -->
         <div class="menu" id="mainMenu">
             <h1>🛡️ سكريبت كاشف المنجم 🔓</h1>
             <p style="color: #aaa; margin-bottom: 10px; font-size: 13px;">اختر نظام اللعب لتفعيل السكريبت فوراً:</p>
@@ -178,7 +178,7 @@
             </div>
         </div>
 
-        <!-- الصفحة الثانية: شاشة الكاشف الحية -->
+        <!-- الصفحة الثانية -->
         <div class="game-area" id="gameArea">
             <div class="header-info">
                 <div>الحالة: <span style="color: #00ffcc;">متصل بالمتعقب 🟢</span></div>
@@ -188,7 +188,7 @@
             <!-- سلم الكشف -->
             <div class="ladder" id="ladderContainer"></div>
 
-            <div id="message">اضغط على الخطوة الحالية لكشف مكان الذهب!</div>
+            <div id="message">ابدأ من الأسفل واضغط على الخطوة الأولى للكشف!</div>
 
             <button id="nextSignalBtn" class="btn hidden" onclick="resetGameVariables()" style="margin-bottom: 8px;">إرسال إشارة جديدة 🔄</button>
             <button class="btn" style="background: #333; color: #fff; border: 1px solid #555;" onclick="resetToMenu()">تغيير الوضع / القائمة</button>
@@ -197,7 +197,7 @@
 
     <script>
         let mode = 2; 
-        let currentStep = 0;
+        let currentStep = 0; // يبدأ من 0 (الأسفل)
         const totalSteps = 6; 
         let winningPaths = []; 
 
@@ -213,7 +213,7 @@
             currentStep = 0;
             winningPaths = [];
             document.getElementById('nextSignalBtn').classList.add('hidden');
-            document.getElementById('message').innerText = "السكريبت جاهز.. اضغط على الخطوة الحالية لكشف الذهب!";
+            document.getElementById('message').innerText = "السكريبت جاهز.. ابدأ من الأسفل للصعود أعلى!";
 
             for (let i = 0; i < totalSteps; i++) {
                 winningPaths.push(Math.floor(Math.random() * mode));
@@ -225,6 +225,7 @@
             const ladder = document.getElementById('ladderContainer');
             ladder.innerHTML = "";
 
+            // الترتيب من أعلى لأسفل في الـ DOM بحيث تكون الخطوة 0 في الأسفل تماماً
             for (let i = totalSteps - 1; i >= 0; i--) {
                 const row = document.createElement('div');
                 row.className = 'row-level';
@@ -265,10 +266,10 @@
 
             currentStep++;
             if (currentStep < totalSteps) {
-                document.getElementById('message').innerText = "تم كشف هذه الخطوة بنجاح! انتقل للخطوة التالية ⚡";
+                document.getElementById('message').innerText = "ممتاز! اصعد للخطوة التالية للأعلى ⚡";
                 activateCurrentStep();
             } else {
-                document.getElementById('message').innerText = "تم كشف جميع خطوات المنجم للنهاية بنجاح! 🏆";
+                document.getElementById('message').innerText = "وصلت للقمة وتم كشف جميع الخطوات بنجاح! 🏆";
                 document.getElementById('nextSignalBtn').classList.remove('hidden');
             }
             document.getElementById('currentStepText').innerText = Math.min(currentStep + 1, totalSteps);
