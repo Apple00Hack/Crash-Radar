@@ -25,7 +25,7 @@
 
         .container {
             background: #1e1e2f;
-            padding: 20px;
+            padding: 25px;
             border-radius: 12px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.8);
             text-align: center;
@@ -41,28 +41,31 @@
             text-shadow: 0 0 10px rgba(0,255,204,0.5);
         }
 
-        .menu select, .btn {
+        .mode-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .mode-btn {
             background: #252538;
             color: #00ffcc;
             border: 2px solid #00ffcc;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 6px;
+            padding: 15px 25px;
+            font-size: 18px;
+            border-radius: 8px;
             cursor: pointer;
-            margin: 10px 0;
             font-weight: bold;
-            width: 100%;
-        }
-
-        .btn {
-            background: #00ffcc;
-            color: #0f172a;
+            flex: 1;
             transition: 0.3s;
         }
 
-        .btn:hover {
-            background: #00b386;
+        .mode-btn:hover {
+            background: #00ffcc;
+            color: #0f172a;
             box-shadow: 0 0 15px rgba(0,255,204,0.8);
+            transform: translateY(-2px);
         }
 
         .game-area {
@@ -105,7 +108,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 15px;
             color: #888;
             font-weight: bold;
             cursor: pointer;
@@ -139,6 +142,23 @@
             color: #ffcc00;
         }
 
+        .btn {
+            background: #00ffcc;
+            color: #0f172a;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background: #00b386;
+        }
+
         .hidden {
             display: none !important;
         }
@@ -147,20 +167,15 @@
 <body>
 
     <div class="container">
-        <!-- الصفحة الأولى: سكريبت الهكر والكاشف -->
+        <!-- الصفحة الأولى: اختيار الوضع مباشرة -->
         <div class="menu" id="mainMenu">
             <h1>🛡️ سكريبت كاشف المنجم 🔓</h1>
-            <p style="color: #aaa; margin-bottom: 15px; font-size: 13px;">اختر وضع اللعبة لتفعيل السكريبت وكشف مسار الذهب</p>
+            <p style="color: #aaa; margin-bottom: 10px; font-size: 13px;">اختر نظام اللعب لتفعيل السكريبت فوراً:</p>
             
-            <div style="margin-bottom: 15px; text-align: right;">
-                <label style="color: #00ffcc; font-size: 14px; font-weight: bold;">حدد الوضع:</label>
-                <select id="gameMode" style="margin-top: 5px;">
-                    <option value="2">مستوى 2x (خيارين)</option>
-                    <option value="3">مستوى 3x (3 خيارات)</option>
-                </select>
+            <div class="mode-buttons">
+                <button class="mode-btn" onclick="initGame(2)">وضع 2x</button>
+                <button class="mode-btn" onclick="initGame(3)">وضع 3x</button>
             </div>
-
-            <button class="btn" onclick="initGame()">تفعيل السكريبت وبدء الكشف ⚡</button>
         </div>
 
         <!-- الصفحة الثانية: شاشة الكاشف الحية -->
@@ -175,8 +190,8 @@
 
             <div id="message">اضغط على الخطوة الحالية لكشف مكان الذهب!</div>
 
-            <button id="nextSignalBtn" class="btn hidden" onclick="nextSignal()" style="margin-bottom: 5px;">إرسال إشارة جديدة 🔄</button>
-            <button class="btn" style="background: #333; color: #fff; border: 1px solid #555; font-size: 14px; padding: 8px;" onclick="resetToMenu()">إيقاف السكريبت والقائمة الرئيسية</button>
+            <button id="nextSignalBtn" class="btn hidden" onclick="resetGameVariables()" style="margin-bottom: 8px;">إرسال إشارة جديدة 🔄</button>
+            <button class="btn" style="background: #333; color: #fff; border: 1px solid #555;" onclick="resetToMenu()">تغيير الوضع / القائمة</button>
         </div>
     </div>
 
@@ -186,13 +201,12 @@
         const totalSteps = 6; 
         let winningPaths = []; 
 
-        function initGame() {
-            mode = parseInt(document.getElementById('gameMode').value);
+        function initGame(selectedMode) {
+            mode = selectedMode;
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('gameArea').style.display = 'block';
             
             resetGameVariables();
-            buildLadder();
         }
 
         function resetGameVariables() {
@@ -204,6 +218,7 @@
             for (let i = 0; i < totalSteps; i++) {
                 winningPaths.push(Math.floor(Math.random() * mode));
             }
+            buildLadder();
         }
 
         function buildLadder() {
@@ -222,7 +237,6 @@
                     box.dataset.step = i;
                     box.dataset.index = j;
                     
-                    // الضغط يكشف محتوى هذه الخطوة بالكامل عبر السكريبت
                     box.onclick = () => revealStep(i);
                     row.appendChild(box);
                 }
@@ -238,7 +252,6 @@
             const row = document.getElementById(`row-${step}`);
             const boxes = row.children;
 
-            // كشف الخانات (إظهار الذهب والديناميت للخطوة الحالية)
             for (let j = 0; j < boxes.length; j++) {
                 boxes[j].onclick = null;
                 if (j === correctIndex) {
@@ -272,11 +285,6 @@
                     }
                 }
             }
-        }
-
-        function nextSignal() {
-            resetGameVariables();
-            buildLadder();
         }
 
         function resetToMenu() {
